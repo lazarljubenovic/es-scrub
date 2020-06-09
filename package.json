@@ -1,0 +1,29 @@
+{
+  "name": "es-schrub",
+  "version": "0.0.1",
+  "description": "An AST manipulation and code generation framework for ECMAScript with accent on ease of use.",
+  "main": "dst/cjs/index.js",
+  "repository": "https://github.com/lazarljubenovic/es-schrub",
+  "author": "Lazar Ljubenović <lazar.ljubenovic.1995@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "@types/chai": "^4.2.11",
+    "@types/common-tags": "^1.8.0",
+    "@types/mocha": "^7.0.2",
+    "chai": "^4.2.0",
+    "mocha": "^7.2.0",
+    "ts-mocha": "^7.0.0",
+    "typescript": "^3.9.5"
+  },
+  "dependencies": {
+    "common-tags": "^1.8.0",
+    "type-guards": "^0.14.1"
+  },
+  "scripts": {
+    "build:cjs": "tsc --outDir dst/cjs --module commonjs",
+    "build:esm": "tsc --outDir dst/esm --module esnext --declaration",
+    "build": "yarn build:cjs && yarn build:esm",
+    "test": "ts-mocha -p ./tsconfig.json src/**/*.spec.ts"
+  }
+}
