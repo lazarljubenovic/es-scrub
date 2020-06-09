@@ -40,6 +40,21 @@ describe(`Classes`, () => {
     const module = new EsModule()
     module.items.append(
       new EsClass()
+        .setName(new EsIdentifier(`Foo`)),
+    )
+    const actual = module.print()
+    const expected = tags.stripIndent`
+      class Foo {
+      
+      }
+    `
+    chai.assert.equal(actual, expected)
+  })
+
+  it(`correctly prints an empty exported class`, () => {
+    const module = new EsModule()
+    module.items.append(
+      new EsClass()
         .setName(new EsIdentifier(`Foo`))
         .setIsExported(true),
     )
