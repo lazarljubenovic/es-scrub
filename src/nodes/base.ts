@@ -1,16 +1,16 @@
 import * as tg from 'type-guards'
+import { IncludeSelfOpts, OverwriteOpts } from '../options.types'
+import { assertNotNull, assertNull } from '../utils'
 
 export type StrictCtor<T> = new (...args: any[]) => T
 export type AbstractCtor<T> = Function & { prototype: T }
 export type Ctor<T> = StrictCtor<T> | AbstractCtor<T>
 export type EsNodeCtor = Ctor<EsNode>
 
-export interface EsNodeSetParentOptions {
-  overwrite?: boolean
+export interface EsNodeSetParentOptions extends OverwriteOpts {
 }
 
-export interface EsNodeGetAncestorsOptions {
-  includeSelf?: boolean
+export interface EsNodeGetAncestorsOptions extends IncludeSelfOpts {
 }
 
 export abstract class EsNode {
@@ -26,12 +26,12 @@ export abstract class EsNode {
   }
 
   public assertParentNotNull (): this {
-    if (this.parent == null) throw new Error(`Didn't expect parent to be null.`)
+    assertNotNull(this.parent, `Didn't expect parent to be null.`)
     return this
   }
 
   public assertParentNull (): this {
-    if (this.parent != null) throw new Error(`Expected parent to be null.`)
+    assertNull(this.parent, `Expected parent to be null.`)
     return this
   }
 

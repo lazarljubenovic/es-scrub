@@ -3,6 +3,7 @@ import * as tags from 'common-tags'
 import { EsModule } from './module'
 import { EsImportedDefaultBinding, EsImportedNamedBinding, EsImportSymbolsDeclaration } from './imports'
 import { EsIdentifier, EsStringLiteral } from './common'
+import { EsClass } from './declarations/class'
 
 describe(`Imports`, () => {
 
@@ -27,6 +28,26 @@ describe(`Imports`, () => {
     const actual = module.print()
     const expected = tags.stripIndent`
       import someModule, { direct, indi as rect } from 'some-module-1'
+    `
+    chai.assert.equal(actual, expected)
+  })
+
+})
+
+describe(`Classes`, () => {
+
+  it(`correctly prints an empty class`, () => {
+    const module = new EsModule()
+    module.items.append(
+      new EsClass()
+        .setName(new EsIdentifier(`Foo`))
+        .setIsExported(true),
+    )
+    const actual = module.print()
+    const expected = tags.stripIndent`
+      export class Foo {
+      
+      }
     `
     chai.assert.equal(actual, expected)
   })
