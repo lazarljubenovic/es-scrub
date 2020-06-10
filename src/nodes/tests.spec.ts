@@ -4,6 +4,23 @@ import { EsModule } from './module'
 import { EsImportedDefaultBinding, EsImportedNamedBinding, EsImportSymbolsDeclaration } from './imports'
 import { EsIdentifier, EsStringLiteral } from './common'
 import { EsClass } from './declarations/class'
+import { EsExportKind } from './enums'
+
+describe(`Common`, () => {
+
+  describe(`EsIdentifier`, () => {
+
+    describe(`IsValidName static method`, () => {
+
+      it(`returns true for a simple string of letters`, () => {
+        chai.assert.isTrue(EsIdentifier.IsValidName('AbCd'))
+      })
+
+    })
+
+  })
+
+})
 
 describe(`Imports`, () => {
 
@@ -39,28 +56,70 @@ describe(`Classes`, () => {
   it(`correctly prints an empty class`, () => {
     const module = new EsModule()
     module.items.append(
-      new EsClass()
-        .setName(new EsIdentifier(`Foo`)),
+      EsClass.New({ name: 'Foo' }),
     )
     const actual = module.print()
     const expected = tags.stripIndent`
-      class Foo {
-      
-      }
+      class Foo { }
     `
     chai.assert.equal(actual, expected)
   })
 
-  it(`correctly prints an empty exported class`, () => {
+  it(`correctly prints an empty exported (by name) class`, () => {
     const module = new EsModule()
     module.items.append(
-      new EsClass()
-        .setName(new EsIdentifier(`Foo`))
-        .setIsExported(true),
+      EsClass.New({ name: 'Foo', exported: EsExportKind.Named }),
     )
     const actual = module.print()
     const expected = tags.stripIndent`
-      export class Foo {
+      export class Foo { }
+    `
+    chai.assert.equal(actual, expected)
+  })
+
+  it(`correctly creates a class with heritage`, () => {
+    const module = new EsModule()
+    const klass = EsClass.New({
+      name: 'Foo',
+      exported: EsExportKind.Default,
+      heritage: ['This', 'And', 'That'],
+    })
+    module.items.append(klass)
+    const actual = module.print()
+    const expected = tags.stripIndent`
+      export default class Foo extends This, And, That { }
+    `
+    chai.assert.equal(actual, expected)
+  })
+
+  it(`correctly creates a class with several methods`, () => {
+    const module = new EsModule()
+    const klass = EsClass.New({
+      name: 'Foo',
+      exported: EsExportKind.None,
+      heritage: 'Bar',
+      methods: [
+        { name: 'first' },
+        { name: 'second', parameters: [] },
+        { name: 'third', parameters: ['a'] },
+        { name: 'fourth', parameters: ['a', { name: 'b' }, { name: 'c', spread: true }] },
+        { name: 'fifth', parameters: ['a', { name: '...b' }] },
+      ],
+    })
+    module.items.append(klass)
+    const actual = module.print()
+    const expected = tags.stripIndent`
+      class Foo extends Bar {
+
+        first () { }
+      
+        second () { }
+
+        third (a) { }
+
+        fourth (a, b, ...c) { }
+
+        fifth (a, ...b) { }
       
       }
     `

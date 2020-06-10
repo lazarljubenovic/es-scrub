@@ -23,3 +23,7 @@ export function indent (string: string, by: number) {
     .map(line => line.length == 0 ? line : prefix + line)
     .join('\n')
 }
+
+export function equiv (a: boolean, b: boolean) {
+  return (a && b) || (!a && !b)
+}

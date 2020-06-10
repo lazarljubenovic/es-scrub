@@ -8,6 +8,11 @@ export class EsNodeList<TNode extends EsNode> {
     protected readonly actualParent: EsNode,
   ) { }
 
+  public copyFrom (other: EsNodeList<TNode>): this {
+    this.nodes = [...other.nodes]
+    return this
+  }
+
   public isEmpty (): boolean {
     return this.nodes.length == 0
   }
