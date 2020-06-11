@@ -2,11 +2,17 @@ import { EsNode } from './base'
 import { EsNodeList } from './node-list'
 import { EsImportDeclaration } from './imports'
 import { EsExportDeclaration } from './exports'
-import { EsStatement } from './statements/base'
-import { EsDeclaration } from './declarations/base'
+import { EsStatement } from './statements'
+import { EsDeclaration } from './declarations'
 import { EsModuleItem } from './module-item'
 
 export class EsModule extends EsNode {
+
+  public static New (structure: Iterable<EsModuleItem>): EsModule {
+    const module = new EsModule()
+    module.items.append(...structure)
+    return module
+  }
 
   public readonly items = new EsNodeList<EsModuleItem>(this)
 

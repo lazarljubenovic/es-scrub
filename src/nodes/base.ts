@@ -81,7 +81,6 @@ export abstract class EsNode {
 
 export abstract class EsLeafNode extends EsNode {
 
-  public* getNodeChildren (): IterableIterator<never> {
-  }
+  public* getNodeChildren (): IterableIterator<never> { }
 
 }

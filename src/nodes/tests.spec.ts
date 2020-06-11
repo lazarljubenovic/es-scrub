@@ -3,8 +3,10 @@ import * as tags from 'common-tags'
 import { EsModule } from './module'
 import { EsImportedDefaultBinding, EsImportedNamedBinding, EsImportSymbolsDeclaration } from './imports'
 import { EsIdentifier, EsStringLiteral } from './common'
-import { EsClass } from './declarations/class'
+import { EsClass, EsVariableDeclaration } from './declarations'
 import { EsExportKind } from './enums'
+import { EsExpressionStatement, EsReturnStatement } from './statements'
+import { EsArrowFunction } from './expressions'
 
 describe(`Common`, () => {
 
@@ -92,7 +94,7 @@ describe(`Classes`, () => {
     chai.assert.equal(actual, expected)
   })
 
-  it(`correctly creates a class with several methods`, () => {
+  it(`correctly creates a class with several empty-bodied methods`, () => {
     const module = new EsModule()
     const klass = EsClass.New({
       name: 'Foo',
@@ -124,6 +126,96 @@ describe(`Classes`, () => {
       }
     `
     chai.assert.equal(actual, expected)
+  })
+
+})
+
+describe(`Statements`, () => {
+
+  describe(`Variable declaration`, () => {
+
+    it(`works for a single binding`, () => {
+      const variable = EsVariableDeclaration.New({
+        type: 'let',
+        bindings: 'foo',
+      })
+      const module = EsModule.New([variable])
+      const actual = module.print()
+      const expected = tags.stripIndent`
+        let foo
+      `
+      chai.assert.equal(actual, expected)
+    })
+
+    it(`works for a single binding with initializer`, () => {
+      const module = EsModule.New([
+        EsVariableDeclaration.New({
+          type: 'const',
+          bindings: { identifier: 'foo', initializer: EsStringLiteral.New('bar') },
+        }),
+      ])
+      const actual = module.print()
+      const expected = tags.stripIndent`
+        const foo = 'bar'
+      `
+      chai.assert.equal(actual, expected)
+    })
+
+    it(`works for several bindings`, () => {
+      const module = EsModule.New([
+        EsVariableDeclaration.New({
+          type: 'var',
+          bindings: [
+            'a',
+            EsIdentifier.New('b'),
+            { identifier: 'c', initializer: EsIdentifier.New('d') },
+          ],
+        }),
+      ])
+      const actual = module.print()
+      const expected = tags.stripIndent`
+        var a, b, c = d
+      `
+      chai.assert.equal(actual, expected)
+    })
+
+  })
+
+  describe(`Arrow functions`, () => {
+
+    it(`works for an empty function`, () => {
+      const module = EsModule.New([
+        EsExpressionStatement.New(
+          EsArrowFunction.New({}),
+        ),
+      ])
+      const actual = module.print()
+      const expected = tags.stripIndent`
+        () => { }
+      `
+      chai.assert.equal(actual, expected)
+    })
+
+    it(`works for a few arguments and a return statement`, () => {
+      const module = EsModule.New([
+        EsExpressionStatement.New(
+          EsArrowFunction.New({
+            params: ['a', 'b', '...c'],
+            body: [
+              EsReturnStatement.New('a'),
+            ],
+          }),
+        ),
+      ])
+      const actual = module.print()
+      const expected = tags.stripIndent`
+        (a, b, ...c) => {
+          return a
+        }
+      `
+      chai.assert.equal(actual, expected)
+    })
+
   })
 
 })

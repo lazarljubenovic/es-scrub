@@ -1,7 +1,10 @@
-import { EsLeafNode } from './base'
+import { EsLeafNode, EsNode } from './base'
 import { Unicode } from '../unicode'
+import { EsNodeList } from './node-list'
+import { EsExpression } from './expressions/'
+import { indent } from '../utils'
 
-export class EsStringLiteral extends EsLeafNode {
+export class EsStringLiteral extends EsExpression {
 
   public static Eq (a: EsStringLiteral, b: EsStringLiteral): boolean {
     return a.value == b.value
@@ -16,13 +19,49 @@ export class EsStringLiteral extends EsLeafNode {
     protected value: string,
   ) { super() }
 
-  public getValue (): string {
-    return this.value
-  }
+  public* getNodeChildren (): IterableIterator<EsNode> { }
 
   // TODO: Handle escaping
   public print (): string {
     return `'${this.value}'`
+  }
+
+  public getValue (): string {
+    return this.value
+  }
+
+}
+
+export interface EsNumericLiteralEqualityOptions {
+  raw?: boolean
+}
+
+export class EsNumericLiteral extends EsExpression {
+
+  public static Eq (a: EsNumericLiteral, b: EsNumericLiteral, opts: EsNumericLiteralEqualityOptions = {}): boolean {
+    if (opts.raw) {
+      return a.raw == b.raw
+    } else {
+      return a.getValue() == b.getValue()
+    }
+  }
+
+  public constructor (
+    protected raw: string,
+  ) { super() }
+
+  public* getNodeChildren (): IterableIterator<EsNode> { }
+
+  public print (): string {
+    return this.raw
+  }
+
+  public getValue (): number {
+    return Number(this.raw)
+  }
+
+  public getRaw (): string {
+    return this.raw
   }
 
 }
@@ -31,7 +70,7 @@ export interface EsIdentifierOptions {
   handleInvalid?: 'ignore' | 'throw' | 'return-null'
 }
 
-export class EsIdentifier extends EsLeafNode {
+export class EsIdentifier extends EsExpression {
 
   public static Eq (a: EsIdentifier, b: EsIdentifier): boolean {
     return a.name == b.name
@@ -63,6 +102,10 @@ export class EsIdentifier extends EsLeafNode {
     return identifier
   }
 
+  public static IsStringOrId (arg: unknown): arg is string | EsIdentifier {
+    return typeof arg == 'string' || arg instanceof EsIdentifier
+  }
+
   public static IsValidName (name: string): boolean {
     if (name != name.trim()) return false
     if (name.length == 0) return false
@@ -84,12 +127,31 @@ export class EsIdentifier extends EsLeafNode {
     protected name: string,
   ) { super() }
 
-  public getName () {
-    return this.name
-  }
+  public* getNodeChildren (): IterableIterator<EsNode> { }
 
   public print (): string {
     return this.name
   }
 
+  public getName () {
+    return this.name
+  }
+
 }
+
+export class EsArrayLiteral extends EsExpression {
+
+  public readonly elements = new EsNodeList<EsExpression>(this)
+
+  public* getNodeChildren (): IterableIterator<EsNode> {
+    yield* this.elements.values()
+  }
+
+  public print (): string {
+    const els = indent(this.elements.print(el => el.print(), '\n'), 2)
+    return `[\n${els}\n]`
+  }
+
+}
+
+
